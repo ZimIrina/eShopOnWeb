@@ -40,6 +40,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 
+//builder.Services.AddApplicationInsightsTelemetry();
+
 builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
 
@@ -93,6 +95,7 @@ builder.Services.AddScoped<HttpService>();
 builder.Services.AddBlazorServices();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
 var app = builder.Build();
 
@@ -179,6 +182,6 @@ using (var scope = app.Services.CreateScope())
         app.Logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
-
+//throw new Exception("Cannot move further2");
 app.Logger.LogInformation("LAUNCHING");
 app.Run();

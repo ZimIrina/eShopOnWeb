@@ -1,11 +1,17 @@
 ﻿using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using Ardalis.GuardClauses;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.eShopWeb.Web.Services;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services;
 
@@ -15,16 +21,22 @@ public class OrderService : IOrderService
     private readonly IUriComposer _uriComposer;
     private readonly IRepository<Basket> _basketRepository;
     private readonly IRepository<CatalogItem> _itemRepository;
+    private readonly IOrderItemsReserverService _itemsReserverService;
+    private readonly IOrderDeliveryService _deliveryService;
 
     public OrderService(IRepository<Basket> basketRepository,
         IRepository<CatalogItem> itemRepository,
         IRepository<Order> orderRepository,
-        IUriComposer uriComposer)
+        IUriComposer uriComposer,
+        IOrderItemsReserverService itemsReserverService,
+        IOrderDeliveryService deliveryService)
     {
         _orderRepository = orderRepository;
         _uriComposer = uriComposer;
         _basketRepository = basketRepository;
         _itemRepository = itemRepository;
+        _itemsReserverService = itemsReserverService;
+        _deliveryService = deliveryService;
     }
 
     public async Task CreateOrderAsync(int basketId, Address shippingAddress)
@@ -47,7 +59,9 @@ public class OrderService : IOrderService
         }).ToList();
 
         var order = new Order(basket.BuyerId, shippingAddress, items);
-
+        _deliveryService.Delivery(order);
+        await _itemsReserverService.Reserve(order);
         await _orderRepository.AddAsync(order);
+
     }
 }

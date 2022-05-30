@@ -1,9 +1,11 @@
-﻿using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+﻿using Microsoft.eShopWeb.ApplicationCore;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Data.Queries;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.eShopWeb.Infrastructure.Services;
+using Microsoft.eShopWeb.Web.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +23,8 @@ public static class ConfigureCoreServices
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IBasketQueryService, BasketQueryService>();
         services.AddSingleton<IUriComposer>(new UriComposer(configuration.Get<CatalogSettings>()));
+        services.AddSingleton<IOrderItemsReserverService>(new OrderItemsReserverService(configuration.Get<OrderItemReserverSettings>()));
+        services.AddSingleton<IOrderDeliveryService>(new OrderDeliveryService(configuration.Get<DeliverySettings>()));
         services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
         services.AddTransient<IEmailSender, EmailSender>();
 

@@ -12,17 +12,20 @@ namespace Microsoft.eShopWeb.Web.Controllers;
 public class OrderController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<OrderController> _logger;
 
-    public OrderController(IMediator mediator)
+    public OrderController(IMediator mediator,
+        ILogger<OrderController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> MyOrders()
     {
         var viewModel = await _mediator.Send(new GetMyOrders(User.Identity.Name));
-
+        //_logger.LogWarning($"Order Count {viewModel.Count()}");
         return View(viewModel);
     }
 
